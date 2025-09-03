@@ -1,0 +1,51 @@
+import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+from pathlib import Path
+import pingouin as pg
+from lets_plot import *
+
+LetsPlot.setup_html(no_js=True)
+#Archivo Guardado
+# Descarga Base de Datos Nasa
+nasa_url = "https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv"
+
+# Lee el archivo directo desde el internet
+df = pd.read_csv(nasa_url, skiprows=1)  # Usar skiprows=1 si la primera fila son notas y no los encabezados
+
+# Paso 2: Gráfico de Junio
+plt.figure(figsize=(10,6))
+plt.plot(df['Year'], df['Jun'], color='blue', label='Anomalía Junio')
+plt.axhline(0, color='gray', linestyle='--', label='promedio de 1951 a 1980')
+plt.xlabel('Año')
+plt.ylabel('Anomalía de Temperatura (°C)')
+plt.title('Anomalía de Temperatura en Junio (Hemisferio Norte)')
+plt.legend()
+#plt.savefig('graficos/Anomalia_Junio.png')
+plt.show()
+
+# Paso 3: Gráfico por estaciones
+plt.figure(figsize=(10,6))
+plt.plot(df['Year'], df['DJF'], label='Invierno (DJF)')
+plt.plot(df['Year'], df['MAM'], label='Primavera (MAM)')
+plt.plot(df['Year'], df['JJA'], label='Verano (JJA)')
+plt.plot(df['Year'], df['SON'], label='Otoño (SON)')
+plt.axhline(0, color='gray', linestyle='--', label='promedio de 1951 a 1980')
+plt.xlabel('Año')
+plt.ylabel('Anomalía de Temperatura (°C)')
+plt.title('Anomalía de Temperatura por Estación (Hemisferio Norte)')
+plt.legend()
+plt.savefig('graficos/Anomalia_Estaciones.png')
+plt.show()
+
+# Paso 4: Gráfico anual
+plt.figure(figsize=(10,6))
+plt.plot(df['Year'], df['J-D'], color='green', label='Anual (J-D)')
+plt.axhline(0, color='gray', linestyle='--', label='promedio de 1951 a 1980')
+plt.xlabel('Año')
+plt.ylabel('Anomalía de Temperatura Anual (°C)')
+plt.title('Anomalía de Temperatura Anual (Hemisferio Norte)')
+plt.legend()
+#plt.savefig('graficos/Anomalia_Anual.png')
+plt.show()
