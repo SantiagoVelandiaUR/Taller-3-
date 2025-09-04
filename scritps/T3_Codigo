@@ -5,42 +5,66 @@ import numpy as np
 from pathlib import Path
 import pingouin as pg
 
-#Archivo Guardado
-# Descarga Base de Datos Nasa
+# Usa un estilo bonito
+plt.style.use('seaborn-v0_8-whitegrid')
+
+# Descarga base de datos NASA directamente
 nasa_url = "https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv"
+df = pd.read_csv(nasa_url, skiprows=1)
 
-# Lee el archivo directo desde el internet
-df = pd.read_csv(nasa_url, skiprows=1)  # Usar skiprows=1 si la primera fila son notas y no los encabezados
+# Configura fuentes grandes y gruesas para todos los gráficos
+plt.rcParams.update({'font.size': 14, 'axes.titlesize': 20, 'axes.labelsize': 16,
+                    'legend.fontsize': 13, 'lines.linewidth': 2.5})
 
-# Paso 2: Gráfico de Junio
-plt.figure(figsize=(10,6))
-plt.plot(df['Year'], df['Jun'], color='blue', label='Anomalía Junio')
-plt.axhline(0, color='gray', linestyle='--', label='promedio de 1951 a 1980')
+# Colores modernos para las estaciones
+station_colors = {
+    'DJF': '#3E92CC',  # Azul
+    'MAM': '#6BBF59',  # Verde
+    'JJA': '#F3A712',  # Amarillo/naranja
+    'SON': '#DE4C8A',  # Rosa
+}
+
+# --- 1.1.2 (i): Gráfico de línea para un mes (Junio) ---
+plt.figure(figsize=(11, 6))
+plt.plot(df['Year'], df['Jun'], color='#1976D2', label='Anomalía Junio')
+plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5, label='Promedio 1951-1980')
 plt.xlabel('Año')
 plt.ylabel('Anomalía de Temperatura (°C)')
-plt.title('Anomalía de Temperatura en Junio (Hemisferio Norte)')
-plt.legend()
-#plt.savefig('graficos/Anomalia_Junio.png')
+plt.title('Anomalía de Temperatura en Junio\nHemisferio Norte', fontweight='bold')
+plt.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, title='Leyenda')
+plt.tight_layout()
+#plt.savefig('graficos/Anomalia_Junio_Bonito.png', dpi=300)
 plt.show()
 
-# Forzar datos de estaciones a tipo numérico: convierte errores en NaN
+# --- 1.1.2 (ii): Gráfico por estaciones (DJF, MAM, JJA, SON) ---
 for col in ['DJF', 'MAM', 'JJA', 'SON']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
-
-# SÓLO conserva filas con datos completos en todas las estaciones
 df_clean = df[['Year', 'DJF', 'MAM', 'JJA', 'SON']].dropna()
-
-# Graficar
-plt.figure(figsize=(10,6))
-plt.plot(df_clean['Year'], df_clean['DJF'], label='Invierno (DJF)')
-plt.plot(df_clean['Year'], df_clean['MAM'], label='Primavera (MAM)')
-plt.plot(df_clean['Year'], df_clean['JJA'], label='Verano (JJA)')
-plt.plot(df_clean['Year'], df_clean['SON'], label='Otoño (SON)')
-plt.axhline(0, color='gray', linestyle='--', label='promedio de 1951 a 1980')
+plt.figure(figsize=(11, 6))
+for est in ['DJF', 'MAM', 'JJA', 'SON']:
+    plt.plot(df_clean['Year'], df_clean[est], label=f'{est}', color=station_colors[est])
+plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5)
 plt.xlabel('Año')
 plt.ylabel('Anomalía de Temperatura (°C)')
-plt.title('Anomalía de Temperatura por Estación (Hemisferio Norte)')
-plt.legend()
+plt.title('Anomalía de Temperatura por Estación\nHemisferio Norte', fontweight='bold')
+plt.legend(title='Estación', frameon=True, fancybox=True, shadow=True)
 plt.tight_layout()
-plt.savefig('graficos/Anomalia_Estaciones_limpio.png')
+#plt.savefig('graficos/Anomalia_Estaciones_Bonito.png', dpi=300)
+plt.show()
+
+# --- 1.1.2 (iii): Gráfico de promedios anuales (columnas J-D) ---
+month_cols = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+for col in month_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+df['Anual_Prom'] = df[month_cols].mean(axis=1)
+df_annual = df[['Year', 'Anual_Prom']].dropna()
+plt.figure(figsize=(11, 6))
+plt.plot(df_annual['Year'], df_annual['Anual_Prom'], label='Anual (J-D)', color='#7B2FF2')
+plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5, label='Promedio 1951-1980')
+plt.xlabel('Año')
+plt.ylabel('Anomalía de Temperatura (°C)')
+plt.title('Anomalía de Temperatura Promedio Anual\nHemisferio Norte', fontweight='bold')
+plt.legend(frameon=True, fancybox=True, shadow=True, title='Leyenda')
+plt.tight_layout()
+#plt.savefig('graficos/Anomalia_Anual_Bonito.png', dpi=300)
 plt.show()
