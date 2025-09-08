@@ -93,8 +93,7 @@ print(tabla_51_80)
 print("\nTabla de frecuencias 1981–2010\n")
 print(tabla_81_10)
 
-# --- 1.2.2: Histograma distribuciones de anomalías ---
-# Histograma 1951-1980
+# --- 1.2.2: Histogramas distribuciones de anomalías ---
 plt.figure(figsize=(13,7))
 plt.bar(tabla_51_80['Rango de anomalía de temperatura (°C)'],
         tabla_51_80['Frecuencia'],
@@ -107,7 +106,6 @@ plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
 plt.show()
 
-# Histograma 1981-2010
 plt.figure(figsize=(13,7))
 plt.bar(tabla_81_10['Rango de anomalía de temperatura (°C)'],
         tabla_81_10['Frecuencia'],
@@ -119,3 +117,12 @@ plt.xticks(rotation=60)
 plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
 plt.show()
+
+# --- 1.2.3: Deciles con np.quantile ---
+# El 3er decil equivale a q=0.3, el 7mo decil a q=0.7
+jd_51_80 = df_51_80['J-D'].dropna().values
+decil_3 = np.quantile(jd_51_80, 0.3)
+decil_7 = np.quantile(jd_51_80, 0.7)
+
+print(f"Valor correspondiente al 3er decil (frío, 1951–1980): {decil_3:.3f}")
+print(f"Valor correspondiente al 7mo decil (caliente, 1951–1980): {decil_7:.3f}")
