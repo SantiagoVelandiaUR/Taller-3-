@@ -12,11 +12,9 @@ plt.style.use('seaborn-v0_8-whitegrid')
 nasa_url = "https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv"
 df = pd.read_csv(nasa_url, skiprows=1)
 
-# Configura fuentes grandes y gruesas para todos los gráficos
 plt.rcParams.update({'font.size': 14, 'axes.titlesize': 20, 'axes.labelsize': 16,
                     'legend.fontsize': 13, 'lines.linewidth': 2.5})
 
-# Colores modernos para las estaciones
 station_colors = {
     'DJF': '#3E92CC',  # Azul
     'MAM': '#6BBF59',  # Verde
@@ -33,7 +31,6 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura en Junio\nHemisferio Norte', fontweight='bold')
 plt.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, title='Leyenda')
 plt.tight_layout()
-#plt.savefig('graficos/Anomalia_Junio_Bonito.png', dpi=300)
 plt.show()
 
 # --- 1.1.2 (ii): Gráfico por estaciones (DJF, MAM, JJA, SON) ---
@@ -49,7 +46,6 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura por Estación\nHemisferio Norte', fontweight='bold')
 plt.legend(title='Estación', frameon=True, fancybox=True, shadow=True)
 plt.tight_layout()
-#plt.savefig('graficos/Anomalia_Estaciones_Bonito.png', dpi=300)
 plt.show()
 
 # --- 1.1.2 (iii): Gráfico de promedios anuales (columnas J-D) ---
@@ -66,5 +62,26 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura Promedio Anual\nHemisferio Norte', fontweight='bold')
 plt.legend(frameon=True, fancybox=True, shadow=True, title='Leyenda')
 plt.tight_layout()
-#plt.savefig('graficos/Anomalia_Anual_Bonito.png', dpi=300)
 plt.show()
+
+# --- 1.2.1: Tablas de frecuencias (sin imagen) ---
+df['J-D'] = pd.to_numeric(df['J-D'], errors='coerce')
+df_51_80 = df[(df['Year'] >= 1951) & (df['Year'] <= 1980)]
+df_81_10 = df[(df['Year'] >= 1981) & (df['Year'] <= 2010)]
+bins = pd.interval_range(start=-0.3, end=1.1, freq=0.05, closed='left')
+freq_51_80 = pd.cut(df_51_80['J-D'], bins=bins).value_counts(sort=False)
+freq_81_10 = pd.cut(df_81_10['J-D'], bins=bins).value_counts(sort=False)
+
+tabla_51_80 = pd.DataFrame({
+    'Range of temperature anomaly (T)': [f"{i.left:.2f}" for i in freq_51_80.index],
+    'Frequency': freq_51_80.values
+})
+tabla_81_10 = pd.DataFrame({
+    'Range of temperature anomaly (T)': [f"{i.left:.2f}" for i in freq_81_10.index],
+    'Frequency': freq_81_10.values
+})
+
+print("\nTabla de frecuencias 1951–1980\n")
+print(tabla_51_80)
+print("\nTabla de frecuencias 1981–2010\n")
+print(tabla_81_10)
