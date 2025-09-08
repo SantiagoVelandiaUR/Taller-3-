@@ -5,15 +5,21 @@ import numpy as np
 from pathlib import Path
 import pingouin as pg
 
-# Usa un estilo bonito
+# Usa un estilo bonito y legible
 plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'legend.fontsize': 13,
+    'lines.linewidth': 2.5,
+    'xtick.labelsize': 12,
+    'ytick.labelsize': 13
+})
 
 # Descarga base de datos NASA directamente
 nasa_url = "https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv"
 df = pd.read_csv(nasa_url, skiprows=1)
-
-plt.rcParams.update({'font.size': 14, 'axes.titlesize': 20, 'axes.labelsize': 16,
-                    'legend.fontsize': 13, 'lines.linewidth': 2.5})
 
 station_colors = {
     'DJF': '#3E92CC',  # Azul
@@ -68,20 +74,48 @@ plt.show()
 df['J-D'] = pd.to_numeric(df['J-D'], errors='coerce')
 df_51_80 = df[(df['Year'] >= 1951) & (df['Year'] <= 1980)]
 df_81_10 = df[(df['Year'] >= 1981) & (df['Year'] <= 2010)]
+
 bins = pd.interval_range(start=-0.3, end=1.1, freq=0.05, closed='left')
 freq_51_80 = pd.cut(df_51_80['J-D'], bins=bins).value_counts(sort=False)
 freq_81_10 = pd.cut(df_81_10['J-D'], bins=bins).value_counts(sort=False)
 
 tabla_51_80 = pd.DataFrame({
-    'Range of temperature anomaly (T)': [f"{i.left:.2f}" for i in freq_51_80.index],
-    'Frequency': freq_51_80.values
+    'Rango de anomalía de temperatura (°C)': [f"{i.left:.2f} – {i.right:.2f}" for i in freq_51_80.index],
+    'Frecuencia': freq_51_80.values
 })
 tabla_81_10 = pd.DataFrame({
-    'Range of temperature anomaly (T)': [f"{i.left:.2f}" for i in freq_81_10.index],
-    'Frequency': freq_81_10.values
+    'Rango de anomalía de temperatura (°C)': [f"{i.left:.2f} – {i.right:.2f}" for i in freq_81_10.index],
+    'Frecuencia': freq_81_10.values
 })
 
 print("\nTabla de frecuencias 1951–1980\n")
 print(tabla_51_80)
 print("\nTabla de frecuencias 1981–2010\n")
 print(tabla_81_10)
+
+# --- 1.2.2: Histograma distribuciones de anomalías ---
+# Histograma 1951-1980
+plt.figure(figsize=(13,7))
+plt.bar(tabla_51_80['Rango de anomalía de temperatura (°C)'],
+        tabla_51_80['Frecuencia'],
+        width=0.8, color="#1976D2", edgecolor="black")
+plt.xlabel('Rango de anomalía de temperatura (°C)')
+plt.ylabel('Frecuencia')
+plt.title('Distribución de anomalías de temperatura (1951-1980)')
+plt.xticks(rotation=60)
+plt.grid(axis='y', linestyle='--', linewidth=0.6)
+plt.tight_layout()
+plt.show()
+
+# Histograma 1981-2010
+plt.figure(figsize=(13,7))
+plt.bar(tabla_81_10['Rango de anomalía de temperatura (°C)'],
+        tabla_81_10['Frecuencia'],
+        width=0.8, color="#F3A712", edgecolor="black")
+plt.xlabel('Rango de anomalía de temperatura (°C)')
+plt.ylabel('Frecuencia')
+plt.title('Distribución de anomalías de temperatura (1981-2010)')
+plt.xticks(rotation=60)
+plt.grid(axis='y', linestyle='--', linewidth=0.6)
+plt.tight_layout()
+plt.show()
