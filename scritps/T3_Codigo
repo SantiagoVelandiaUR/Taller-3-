@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import pingouin as pg
+import os
 
 plt.style.use('seaborn-v0_8-whitegrid')
 plt.rcParams.update({
@@ -16,10 +17,17 @@ plt.rcParams.update({
     'ytick.labelsize': 13
 })
 
+output_dir = '../outputs'
+os.makedirs(output_dir, exist_ok=True)
+
+def save_fig(fig, filename):
+    path = os.path.join(output_dir, filename)
+    fig.savefig(path)
+    print(f'Guardado: {path}')
+
 # Descarga base de datos NASA directamente
 nasa_url = "https://data.giss.nasa.gov/gistemp/tabledata_v3/NH.Ts+dSST.csv"
 df = pd.read_csv(nasa_url, skiprows=1)
-
 station_colors = {
     'DJF': '#3E92CC',  # Azul
     'MAM': '#6BBF59',  # Verde
@@ -28,7 +36,7 @@ station_colors = {
 }
 
 # --- 1.1.2 (i): Gráfico línea Junio ---
-plt.figure(figsize=(11, 6))
+fig1 = plt.figure(figsize=(11, 6))
 plt.plot(df['Year'], df['Jun'], color='#1976D2', label='Anomalía Junio')
 plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5, label='Promedio 1951-1980')
 plt.xlabel('Año')
@@ -36,13 +44,14 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura en Junio\nHemisferio Norte', fontweight='bold')
 plt.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, title='Leyenda')
 plt.tight_layout()
-plt.show()
+save_fig(fig1, 'anomalía_temperatura_junio.png')
+plt.close(fig1)
 
 # --- 1.1.2 (ii): Gráfico estaciones ---
 for col in ['DJF', 'MAM', 'JJA', 'SON']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 df_clean = df[['Year', 'DJF', 'MAM', 'JJA', 'SON']].dropna()
-plt.figure(figsize=(11, 6))
+fig2 = plt.figure(figsize=(11, 6))
 for est in ['DJF', 'MAM', 'JJA', 'SON']:
     plt.plot(df_clean['Year'], df_clean[est], label=f'{est}', color=station_colors[est])
 plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5)
@@ -51,7 +60,8 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura por Estación\nHemisferio Norte', fontweight='bold')
 plt.legend(title='Estación', frameon=True, fancybox=True, shadow=True)
 plt.tight_layout()
-plt.show()
+save_fig(fig2, 'anomalía_temperatura_estaciones.png')
+plt.close(fig2)
 
 # --- 1.1.2 (iii): Gráfico promedio anual ---
 month_cols = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -59,7 +69,7 @@ for col in month_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 df['Anual_Prom'] = df[month_cols].mean(axis=1)
 df_annual = df[['Year', 'Anual_Prom']].dropna()
-plt.figure(figsize=(11, 6))
+fig3 = plt.figure(figsize=(11, 6))
 plt.plot(df_annual['Year'], df_annual['Anual_Prom'], label='Anual (J-D)', color='#7B2FF2')
 plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5, label='Promedio 1951-1980')
 plt.xlabel('Año')
@@ -67,7 +77,8 @@ plt.ylabel('Anomalía de Temperatura (°C)')
 plt.title('Anomalía de Temperatura Promedio Anual\nHemisferio Norte', fontweight='bold')
 plt.legend(frameon=True, fancybox=True, shadow=True, title='Leyenda')
 plt.tight_layout()
-plt.show()
+save_fig(fig3, 'anomalía_temperatura_promedio_anual.png')
+plt.close(fig3)
 
 # --- 1.2.1: Tablas de frecuencias ---
 df['J-D'] = pd.to_numeric(df['J-D'], errors='coerce')
@@ -90,7 +101,7 @@ print("\nTabla de frecuencias 1981–2010\n")
 print(tabla_81_10)
 
 # --- 1.2.2: Histogramas ---
-plt.figure(figsize=(13,7))
+fig4 = plt.figure(figsize=(13,7))
 plt.bar(tabla_51_80['Rango de anomalía de temperatura (°C)'],
         tabla_51_80['Frecuencia'], width=0.8, color="#1976D2", edgecolor="black")
 plt.xlabel('Rango de anomalía de temperatura (°C)')
@@ -99,9 +110,10 @@ plt.title('Distribución de anomalías de temperatura (1951-1980)')
 plt.xticks(rotation=60)
 plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
-plt.show()
+save_fig(fig4, 'histograma_temperaturas_1951_1980.png')
+plt.close(fig4)
 
-plt.figure(figsize=(13,7))
+fig5 = plt.figure(figsize=(13,7))
 plt.bar(tabla_81_10['Rango de anomalía de temperatura (°C)'],
         tabla_81_10['Frecuencia'], width=0.8, color="#F3A712", edgecolor="black")
 plt.xlabel('Rango de anomalía de temperatura (°C)')
@@ -110,7 +122,8 @@ plt.title('Distribución de anomalías de temperatura (1981-2010)')
 plt.xticks(rotation=60)
 plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
-plt.show()
+save_fig(fig5, 'histograma_temperaturas_1981_2010.png')
+plt.close(fig5)
 
 # --- 1.2.3: Deciles ---
 jd_51_80 = df_51_80['J-D'].dropna().values
@@ -156,8 +169,8 @@ df_co2 = pd.read_excel('../data/raw/mauna_loa_co2.xlsx')
 print(df_co2.head())
 
 # --- Pregunta 1.3.3: gráfica CO2 interpolated y trend desde 1960 ---
-df_1960 = df_co2[df_co2['Year'] >= 1960]  # Cambia 'year' si es necesario
-plt.figure(figsize=(11, 6))
+df_1960 = df_co2[df_co2['Year'] >= 1960]  # Cambia 'Year' si es necesario
+fig_co2 = plt.figure(figsize=(11, 6))
 plt.plot(df_1960['Year'], df_1960['Interpolated'], label='CO₂ Interpolado', color='#1976D2')
 plt.plot(df_1960['Year'], df_1960['Trend'], label='CO₂ Tendencia', color='#F39C12', linestyle='--')
 plt.xlabel('Año')
@@ -166,32 +179,26 @@ plt.title('Evolución del CO₂ Atmosférico (Mauna Loa) desde 1960')
 plt.legend(title='Serie CO₂', frameon=True, fancybox=True, shadow=True)
 plt.grid(True, linestyle='--', linewidth=0.7)
 plt.tight_layout()
-plt.show()
+save_fig(fig_co2, 'evolucion_co2_mauna_loa_1960.png')
+plt.close(fig_co2)
 
-# --- 1.3.4: CO₂ (tendencia) vs anomalía de temperatura de un mes ---
-# Supongamos que elegimos JUNIO para el análisis
-
-# Primero, asegúrate de los nombres reales de las columnas
-print(df_co2.columns)     # Debería tener 'Year' y 'Trend'
-print(df.columns)         # Debería tener 'Year' y 'Jun'
-
-# Mantener los datos solo para los años en común
+# --- 1.3.4: CO₂ (tendencia) vs anomalía de temperatura de un mes (JUNIO) ---
 df_scatter = pd.merge(
-    df[['Year', 'Jun']], 
-    df_co2[['Year', 'Trend']], 
-    how='inner', 
+    df[['Year', 'Jun']],
+    df_co2[['Year', 'Trend']],
+    how='inner',
     on='Year'
 ).dropna()
 
-# Gráfico de dispersión
-plt.figure(figsize=(9,6))
+fig_scatter = plt.figure(figsize=(9,6))
 plt.scatter(df_scatter['Jun'], df_scatter['Trend'], color='#3E92CC', edgecolor='black', alpha=0.8)
 plt.xlabel('Anomalía de Temperatura Junio (°C)')
 plt.ylabel('CO₂ Tendencia (ppm)')
 plt.title('Dispersión: CO₂ Tendencia vs\nAnomalía de Temperatura de Junio')
 plt.grid(True, linestyle="--", linewidth=0.7)
 plt.tight_layout()
-plt.show()
+save_fig(fig_scatter, 'dispersión_co2_vs_temperatura_junio.png')
+plt.close(fig_scatter)
 
 # Calcular el coeficiente de correlación de Pearson
 corr_pearson = df_scatter['Jun'].corr(df_scatter['Trend'])
