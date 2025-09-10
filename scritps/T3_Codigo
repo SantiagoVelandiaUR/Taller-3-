@@ -27,7 +27,7 @@ station_colors = {
     'SON': '#DE4C8A',  # Rosa
 }
 
-# --- 1.1.2 (i): Gráfico de línea para un mes (Junio) ---
+# --- 1.1.2 (i): Gráfico línea Junio ---
 plt.figure(figsize=(11, 6))
 plt.plot(df['Year'], df['Jun'], color='#1976D2', label='Anomalía Junio')
 plt.axhline(0, color='#666666', linestyle='--', linewidth=1.5, label='Promedio 1951-1980')
@@ -38,7 +38,7 @@ plt.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, title='Le
 plt.tight_layout()
 plt.show()
 
-# --- 1.1.2 (ii): Gráfico por estaciones (DJF, MAM, JJA, SON) ---
+# --- 1.1.2 (ii): Gráfico estaciones ---
 for col in ['DJF', 'MAM', 'JJA', 'SON']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 df_clean = df[['Year', 'DJF', 'MAM', 'JJA', 'SON']].dropna()
@@ -53,7 +53,7 @@ plt.legend(title='Estación', frameon=True, fancybox=True, shadow=True)
 plt.tight_layout()
 plt.show()
 
-# --- 1.1.2 (iii): Gráfico de promedios anuales (columnas J-D) ---
+# --- 1.1.2 (iii): Gráfico promedio anual ---
 month_cols = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 for col in month_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -69,7 +69,7 @@ plt.legend(frameon=True, fancybox=True, shadow=True, title='Leyenda')
 plt.tight_layout()
 plt.show()
 
-# --- 1.2.1: Tablas de frecuencias (sin imagen) ---
+# --- 1.2.1: Tablas de frecuencias ---
 df['J-D'] = pd.to_numeric(df['J-D'], errors='coerce')
 df_51_80 = df[(df['Year'] >= 1951) & (df['Year'] <= 1980)]
 df_81_10 = df[(df['Year'] >= 1981) & (df['Year'] <= 2010)]
@@ -89,11 +89,10 @@ print(tabla_51_80)
 print("\nTabla de frecuencias 1981–2010\n")
 print(tabla_81_10)
 
-# --- 1.2.2: Histogramas distribuciones de anomalías ---
+# --- 1.2.2: Histogramas ---
 plt.figure(figsize=(13,7))
 plt.bar(tabla_51_80['Rango de anomalía de temperatura (°C)'],
-        tabla_51_80['Frecuencia'],
-        width=0.8, color="#1976D2", edgecolor="black")
+        tabla_51_80['Frecuencia'], width=0.8, color="#1976D2", edgecolor="black")
 plt.xlabel('Rango de anomalía de temperatura (°C)')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de anomalías de temperatura (1951-1980)')
@@ -101,10 +100,10 @@ plt.xticks(rotation=60)
 plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
 plt.show()
+
 plt.figure(figsize=(13,7))
 plt.bar(tabla_81_10['Rango de anomalía de temperatura (°C)'],
-        tabla_81_10['Frecuencia'],
-        width=0.8, color="#F3A712", edgecolor="black")
+        tabla_81_10['Frecuencia'], width=0.8, color="#F3A712", edgecolor="black")
 plt.xlabel('Rango de anomalía de temperatura (°C)')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de anomalías de temperatura (1981-2010)')
@@ -113,31 +112,29 @@ plt.grid(axis='y', linestyle='--', linewidth=0.6)
 plt.tight_layout()
 plt.show()
 
-# --- 1.2.3: Deciles con np.quantile ---
+# --- 1.2.3: Deciles ---
 jd_51_80 = df_51_80['J-D'].dropna().values
 decil_3 = np.quantile(jd_51_80, 0.3)
 decil_7 = np.quantile(jd_51_80, 0.7)
 print(f"Valor correspondiente al 3er decil (frío, 1951–1980): {decil_3:.3f}")
 print(f"Valor correspondiente al 7mo decil (caliente, 1951–1980): {decil_7:.3f}")
 
-# --- 1.2.4: Conteo y porcentaje de años "calientes" en 1981–2010 ---
+# --- 1.2.4: Conteo años calientes ---
 umbral_caliente = decil_7
 anomalias_calientes = df_81_10[df_81_10['J-D'] > umbral_caliente]
 num_calientes = len(anomalias_calientes)
 total_anios = len(df_81_10)
 porcentaje_calientes = (num_calientes / total_anios) * 100
-
 print(f"\nCantidad de años “calientes” (J-D > {umbral_caliente:.3f}) en 1981–2010: {num_calientes}")
 print(f"Porcentaje de años “calientes” en 1981–2010: {porcentaje_calientes:.1f}%")
 
-# --- 1.2.5: Media y varianza de las temperaturas por estación en tres periodos ---
+# --- 1.2.5: Media y varianza por estación ---
 periodos = {
     '1921-1950': (1921, 1950),
     '1951-1980': (1951, 1980),
     '1981-2010': (1981, 2010)
 }
 estaciones = ['DJF', 'MAM', 'JJA', 'SON']
-
 resultados = []
 for nombre_periodo, (ini, fin) in periodos.items():
     df_periodo = df[(df['Year'] >= ini) & (df['Year'] <= fin)]
@@ -150,7 +147,53 @@ for nombre_periodo, (ini, fin) in periodos.items():
             'Media': round(media, 3),
             'Varianza': round(varianza, 4)
         })
-
 tabla_estadisticas = pd.DataFrame(resultados)
 print("\nMedia y varianza de las temperaturas por estación (DJF, MAM, JJA, SON) en los tres periodos:")
 print(tabla_estadisticas)
+
+# --- Cargar base CO2 ---
+df_co2 = pd.read_excel('../data/raw/mauna_loa_co2.xlsx')
+print(df_co2.head())
+
+# --- Pregunta 1.3.3: gráfica CO2 interpolated y trend desde 1960 ---
+df_1960 = df_co2[df_co2['Year'] >= 1960]  # Cambia 'year' si es necesario
+plt.figure(figsize=(11, 6))
+plt.plot(df_1960['Year'], df_1960['Interpolated'], label='CO₂ Interpolado', color='#1976D2')
+plt.plot(df_1960['Year'], df_1960['Trend'], label='CO₂ Tendencia', color='#F39C12', linestyle='--')
+plt.xlabel('Año')
+plt.ylabel('Concentración CO₂ (ppm)')
+plt.title('Evolución del CO₂ Atmosférico (Mauna Loa) desde 1960')
+plt.legend(title='Serie CO₂', frameon=True, fancybox=True, shadow=True)
+plt.grid(True, linestyle='--', linewidth=0.7)
+plt.tight_layout()
+plt.show()
+
+# --- 1.3.4: CO₂ (tendencia) vs anomalía de temperatura de un mes ---
+# Supongamos que elegimos JUNIO para el análisis
+
+# Primero, asegúrate de los nombres reales de las columnas
+print(df_co2.columns)     # Debería tener 'Year' y 'Trend'
+print(df.columns)         # Debería tener 'Year' y 'Jun'
+
+# Mantener los datos solo para los años en común
+df_scatter = pd.merge(
+    df[['Year', 'Jun']], 
+    df_co2[['Year', 'Trend']], 
+    how='inner', 
+    on='Year'
+).dropna()
+
+# Gráfico de dispersión
+plt.figure(figsize=(9,6))
+plt.scatter(df_scatter['Jun'], df_scatter['Trend'], color='#3E92CC', edgecolor='black', alpha=0.8)
+plt.xlabel('Anomalía de Temperatura Junio (°C)')
+plt.ylabel('CO₂ Tendencia (ppm)')
+plt.title('Dispersión: CO₂ Tendencia vs\nAnomalía de Temperatura de Junio')
+plt.grid(True, linestyle="--", linewidth=0.7)
+plt.tight_layout()
+plt.show()
+
+# Calcular el coeficiente de correlación de Pearson
+corr_pearson = df_scatter['Jun'].corr(df_scatter['Trend'])
+print(f"Coeficiente de correlación de Pearson (CO₂ vs Temperatura Junio): {corr_pearson:.3f}")
+
