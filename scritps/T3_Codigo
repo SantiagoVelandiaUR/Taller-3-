@@ -1,3 +1,5 @@
+
+
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -17,7 +19,7 @@ plt.rcParams.update({
     'ytick.labelsize': 13
 })
 
-output_dir = '../outputs'
+output_dir = '../data/final'
 os.makedirs(output_dir, exist_ok=True)
 
 def save_fig(fig, filename):
@@ -203,4 +205,3 @@ plt.close(fig_scatter)
 # Calcular el coeficiente de correlación de Pearson
 corr_pearson = df_scatter['Jun'].corr(df_scatter['Trend'])
 print(f"Coeficiente de correlación de Pearson (CO₂ vs Temperatura Junio): {corr_pearson:.3f}")
-
